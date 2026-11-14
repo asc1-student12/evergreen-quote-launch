@@ -1,9 +1,9 @@
-// QuotesContext.tsx (provided - Day 3, drop into src/context/QuotesContext.tsx)
-// CONTEXT + useReducer: one shared home for the quotes list, so components
-// read and update it without prop drilling. The provider also owns the data
-// loading now: the same useEffect fetch you wired this morning moved here,
-// which is what "refactor without changing behavior" looks like. You drop it
-// in; you don't modify it.
+// QuotesContext.tsx (provided - Day 2, REPLACES src/context/QuotesContext.tsx)
+// Version 3 of the provider, and the second behavior-preserving replacement
+// this app has seen: the components still call useQuotes() exactly as before,
+// but the data now comes from the Evergreen Quote API instead of a bundled
+// file, and saving a quote persists it in the database. You drop it in; you
+// don't modify it.
 import {
   createContext,
   useContext,
@@ -13,6 +13,7 @@ import {
   type ReactNode,
 } from "react";
 import type { Quote } from "../types";
+import { fetchQuotes, saveQuote, type NewQuoteInput } from "../api";
 
 type Action =
   | { type: "loaded"; quotes: Quote[] }
@@ -33,7 +34,7 @@ interface QuotesContextValue {
   quotes: Quote[];
   loading: boolean;
   error: string | null;
-  addQuote: (quote: Quote) => void;
+  addQuote: (input: NewQuoteInput) => Promise<void>;
 }
 
 const QuotesContext = createContext<QuotesContextValue | null>(null);
@@ -50,9 +51,7 @@ export function QuotesProvider({ children }: { children: ReactNode }) {
       try {
         setLoading(true);
         setError(null);
-        const res = await fetch("/quotes.json", { signal: controller.signal });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data: Quote[] = await res.json();
+        const data = await fetchQuotes(controller.signal);
         dispatch({ type: "loaded", quotes: data });
       } catch (err) {
         if (err instanceof Error && err.name !== "AbortError") {
@@ -67,7 +66,18 @@ export function QuotesProvider({ children }: { children: ReactNode }) {
     return () => controller.abort(); // cleanup: cancel if unmounted
   }, []);
 
-  const addQuote = (quote: Quote) => dispatch({ type: "add", quote });
+  // Saving now goes through the API: the database assigns the id, the API
+  // computes the premium, and the saved quote comes back as the record of
+  // truth. The list shows what the server saved, not what the browser hoped.
+  const addQuote = async (input: NewQuoteInput) => {
+    try {
+      setError(null);
+      const saved = await saveQuote(input);
+      dispatch({ type: "add", quote: saved });
+    } catch {
+      setError("Could not save the quote.");
+    }
+  };
 
   return (
     <QuotesContext.Provider value={{ quotes, loading, error, addQuote }}>

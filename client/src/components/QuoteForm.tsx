@@ -1,8 +1,9 @@
-// QuoteForm.tsx (provided - Day 3, REPLACES src/components/QuoteForm.tsx)
-// The form logic now lives in the useQuoteEstimate hook, and saving a quote
-// dispatches into context via addQuote. The customer sees the same form,
-// plus a working "Save this quote" button. You drop it in; you don't
-// modify it.
+// QuoteForm.tsx (provided - Day 2, REPLACES src/components/QuoteForm.tsx)
+// One change from the Phase 2 version: saving no longer invents an id and a
+// premium in the browser. The form sends the visitor's inputs; the API
+// assigns the id and computes the premium of record. The estimate on screen
+// is still the local math, which is exactly what makes Tuesday's rate
+// comparison interesting. You drop it in; you don't modify it.
 import PremiumDisplay from "./PremiumDisplay";
 import { useQuoteEstimate } from "../hooks/useQuoteEstimate";
 import { useQuotes } from "../context/QuotesContext";
@@ -23,7 +24,7 @@ function QuoteForm() {
 
   function handleSave() {
     if (!isValid || premium === null) return;
-    addQuote({ id: Date.now(), type, age, coverageAmount, monthlyPremium: premium });
+    void addQuote({ type, age, coverageAmount });
   }
 
   return (
