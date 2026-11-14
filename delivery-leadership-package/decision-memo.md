@@ -1,29 +1,28 @@
-# Decision Memo: _short title here_
+# Decision Memo: Keep the instant estimate, with the server as the source of truth
 
-> Copy to `delivery-leadership-package/decision-memo.md`. Target length: ~250 words. Write for a non-technical reader. Name the options you **rejected**, not just the one you picked.
-
-**Date:**
-**Author:** _your name_
-**Decision area:** _e.g., Day 2 scope tradeoff_
+**Date:** Day 2
+**Author:** Scott Cannon, Delivery Lead
+**Decision area:** Where the premium is calculated
 
 ## Context
 
-_What was the situation that forced a choice? 2–3 sentences._
+Once the app was connected to the quote service, the same inputs showed two prices. The on-screen estimate said $425 and the saved quote said $450. Both sides were working correctly; they used different rate tables. The app calculates an instant estimate in the browser, while the service calculates the official premium when a quote is saved. The sponsor's instruction was clear: the server is the source of truth. I aligned the app's rates to the service's, so both now show $450. But the price is still calculated in two places.
 
 ## Options considered
 
-1. **Option A: _name_.** _Pros / cons in plain English._
-2. **Option B: _name_.** _Pros / cons._
-3. **Option C: _name_.** _Pros / cons._ (Optional.)
+1. **Keep both calculations, aligned.** The customer sees a price instantly as they type, and the saved premium remains the official one. The risk is that a future rate change updates only one side.
+2. **Ask the service for every estimate.** One calculation, so the two prices can never differ. But every keystroke becomes a network request: slower, more load on the service, and no estimate at all if the service is down.
+3. **Have the app fetch the rates from the service when it opens.** One rate table and an instant estimate. This is the best long-term answer, but it is new code, and this week is assembly only.
 
 ## Recommendation
 
-_Which option. One paragraph._
+Option 1 for the launch, and Option 3 for the next round. Keep the instant estimate, with its rates aligned to the service's, and treat the saved premium as the official price. Next round, the app should read its rates from the service, so there is only one rate table.
 
 ## Why
 
-_The single most important reason, named in customer or business terms, not technical ones._
+A first-time shopper decides in seconds whether a price is worth pursuing. An instant estimate keeps them engaged, while a network request on every keystroke would make the page feel slower and fail completely if the service went down. With the rates aligned and the service as the source of truth, the customer sees one price today. The remaining risk is a future rate change applied to only one side, and that is now logged and owned (risk R2).
 
 ## What would change my mind
 
-_If X happened by Y date, I would revisit this._
+If rates start changing often, or if a regulator requires the displayed price to be calculated by the same system that issues it, I would move straight to Option 3, or to Option 2 if Option 3 could not be ready in time.
+
