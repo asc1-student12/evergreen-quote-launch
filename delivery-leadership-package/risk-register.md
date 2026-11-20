@@ -16,3 +16,5 @@
 
 I re-read it at the start of each working block and before each commit. Rows that have happened stay in, marked and dated, because Friday's showcase asks what actually happened. New rows are added the day they appear: the injects and the cluster work will add more.
 
+
+**Update (Day 4), R5:** the VM does not shut down at 9 PM; only clipboard input stops. The cluster survives overnight, so the rebuild becomes the fallback rather than the plan. Likelihood revised from H to L.
