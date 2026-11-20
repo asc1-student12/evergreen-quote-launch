@@ -1,5 +1,7 @@
 # Scratch log (raw, unpolished)
 
+> A raw, timestamped working record kept as the week happened. Highlights: the missing .gitignore (Day 1), the seam defect and the $425 vs $450 drift (Day 2), three stale-process catches and the Copilot seed experiment (Day 3), and the clean-clone check (Day 4).
+
 Mon Nov 9 20:15 - Platforms green: Node 22.22.0, Docker, kind, kubectl, mongosh ok:1, Live Server. AWS: no credentials at first; configured via aws configure (keys in ~/.aws, outside the repo). Found Monday, not Thursday.
 Mon Nov 9 20:25 - Starter ships with NO .gitignore: THIRD PHASE IN A ROW. The guide says dist/ stays out of Git thanks to the .gitignore. Created one covering node_modules/ in api and client, and dist/. Caught before the first commit.
 Mon Nov 9 20:30 - Repo created PUBLIC (the guide says private; reviewers need access). delivery/lead pushed.
@@ -19,3 +21,5 @@ Day 3 - COPILOT SEED STEP. Copilot added q7 (life 45/500000 at 210.0) and q8 (ho
 Day 3 - DECISION: skipped the gated EKS cloud pass. The instructor allowed it, but the remaining required work (go/no-go, Day 4 merge, showcase) comes first the night before the presentation, and an EKS cluster left running overnight is risk R6. The guide states skipping costs nothing; the demo is local by design.
 Day 3 - Inject #2: shared demo environment (namespace demo) broken: API pods CrashLoopBackOff, MONGO_URI injected where the app reads MONGODB_URI, database healthy. ROUTED to the platform team with a question and a deadline; holding message to the manager. Own stack verified with evidence. Go/no-go: GO WITH CONDITIONS on the Friday demo.
 Day 4 - Production build passed (type-check, then dist/); dist/ ignored by git. npm run preview on 4173 loaded the cluster quotes through the proxy: the built artifact against a real API and database. API tests 7/7.
+Day 4 - PR 20 squash-merged with all 4 checks green (both jobs, on push and on the pull request); branch deleted. main re-verified: cluster quotes load, estimate and saved premium agree at 450, save survives reload. Clean clone: 0 node_modules tracked, API 7/7, client type-check clean, build passes.
+Day 4 - Clean clone confirmed: 0 node_modules tracked; API 7/7; client type-check clean; production build passes (147 kB JS, 47.5 kB compressed). Merge-commit CI green: https://github.com/asc1-student12/evergreen-quote-launch/actions/runs/44668124363
