@@ -1,0 +1,76 @@
+# Day 3: Container and Cluster Evidence
+
+## Container
+
+$ docker images | grep evergreen-quote-api
+evergreen-quote-api:1.0                                                                fc742382cf99        722MB          178MB        
+evergreen-quote-api:2.0                                                                d6fb2a77dbc7        724MB          178MB   U    
+
+$ curl http://localhost:3000/   (served by the container)
+{"message":"Evergreen Quote API","status":"ok"}
+
+## Cluster
+
+$ kubectl apply --dry-run=client -f k8s/
+deployment.apps/evergreen-quote-api created (dry run)
+deployment.apps/mongo created (dry run)
+service/mongo created (dry run)
+service/evergreen-quote-api created (dry run)
+
+Reading: the dry run proves the manifests parse and would apply cleanly. It does NOT prove the release is right: it does not run the image, reach the database, or check the data.
+
+$ kubectl get pods
+NAME                                   READY   STATUS    RESTARTS   AGE
+evergreen-quote-api-5b99c99f9c-26t7t   1/1     Running   0          3h19m
+evergreen-quote-api-5b99c99f9c-jht47   1/1     Running   0          3h19m
+evergreen-quote-api-5b99c99f9c-lgpbn   1/1     Running   0          3h19m
+mongo-77984b56bb-8j4w8                 1/1     Running   0          3h19m
+
+$ curl http://localhost:3000/api/quotes   (through the port-forward, from the cluster database)
+[{"_id":"1ca3bfad-40cd-448d-924d-7cee84dd201a","type":"auto","age":56,"coverageAmount":50000,"monthlyPremium":450,"tags":[],"createdAt":"2026-11-19T21:31:29.294Z","updatedAt":"2026-11-19T21:31:29.294Z","__v":0}]
+
+The cluster database and the VM database are different databases with the same product in front of them. The client changed by not one line.
+
+## Optional challenge: scale and self-heal
+
+$ kubectl scale deployment evergreen-quote-api --replicas=5
+NAME                                   READY   STATUS    RESTARTS   AGE
+evergreen-quote-api-5b99c99f9c-26t7t   1/1     Running   0          11h
+evergreen-quote-api-5b99c99f9c-2q2k5   1/1     Running   0          15s
+evergreen-quote-api-5b99c99f9c-jht47   1/1     Running   0          11h
+evergreen-quote-api-5b99c99f9c-lgpbn   1/1     Running   0          11h
+evergreen-quote-api-5b99c99f9c-mp7qp   1/1     Running   0          15s
+mongo-77984b56bb-8j4w8                 1/1     Running   0          11h
+NAME                                   READY   STATUS    RESTARTS   AGE
+evergreen-quote-api-5b99c99f9c-26t7t   1/1     Running   0          11h
+evergreen-quote-api-5b99c99f9c-2q2k5   1/1     Running   0          106s
+evergreen-quote-api-5b99c99f9c-jht47   1/1     Running   0          11h
+evergreen-quote-api-5b99c99f9c-jk7wc   1/1     Running   0          31s
+evergreen-quote-api-5b99c99f9c-lgpbn   1/1     Running   0          11h
+mongo-77984b56bb-8j4w8                 1/1     Running   0          11h
+NAME                                   READY   STATUS        RESTARTS   AGE
+evergreen-quote-api-5b99c99f9c-26t7t   1/1     Running       0          11h
+evergreen-quote-api-5b99c99f9c-2q2k5   1/1     Terminating   0          2m59s
+evergreen-quote-api-5b99c99f9c-jht47   1/1     Running       0          11h
+evergreen-quote-api-5b99c99f9c-jk7wc   1/1     Terminating   0          104s
+evergreen-quote-api-5b99c99f9c-lgpbn   1/1     Running       0          11h
+mongo-77984b56bb-8j4w8                 1/1     Running       0          11h
+
+Reading: the Deployment declares 3 replicas and the cluster holds that true. Scaled to 5, deleted a pod, and a replacement started unprompted; the data survived because the API pods are stateless and the data lives in the mongo pod.
+
+## Day 4: production build
+
+$ npm run build   (client)
+
+> evergreen-quote-client@1.0.0 build
+> tsc && vite build
+
+vite v5.4.21 building for production...
+transforming...
+✓ 38 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.42 kB │ gzip:  0.29 kB
+dist/assets/index-vlqMj2wR.css    2.20 kB │ gzip:  0.89 kB
+dist/assets/index-CkcPWJPg.js   147.24 kB │ gzip: 47.54 kB
+✓ built in 1.07s

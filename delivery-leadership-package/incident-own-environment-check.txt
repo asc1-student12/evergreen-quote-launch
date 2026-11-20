@@ -1,0 +1,40 @@
+# Inject #2: Own-Environment Check
+
+The shared demo cluster is broken. This file shows MY environment, checked at the time of the incident.
+
+$ grep -n MONGODB_URI api/src/db.js k8s/deployment.yaml
+api/src/db.js:4:const MONGODB_URI =
+api/src/db.js:5:  process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/evergreen";
+api/src/db.js:8:  await mongoose.connect(MONGODB_URI, { serverSelectionTimeoutMS: 5000 });
+api/src/db.js:9:  console.log("Connected to MongoDB:", MONGODB_URI);
+k8s/deployment.yaml:26:            - name: MONGODB_URI
+
+$ kubectl config current-context
+kind-evergreen
+
+$ kubectl get pods   (my kind cluster)
+NAME                                   READY   STATUS    RESTARTS   AGE
+evergreen-quote-api-5b99c99f9c-26t7t   1/1     Running   0          12h
+evergreen-quote-api-5b99c99f9c-jht47   1/1     Running   0          12h
+evergreen-quote-api-5b99c99f9c-lgpbn   1/1     Running   0          12h
+mongo-77984b56bb-8j4w8                 1/1     Running   0          12h
+
+$ gh run view 44652771899 (my latest two-job CI run)
+
+✓ delivery/lead CI · 44652771899
+Triggered via push about 1 hour ago
+
+JOBS
+✓ Test the API in 26s (ID 136011497654)
+✓ Type-check and build the client in 10s (ID 136011497975)
+
+ANNOTATIONS
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-node@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Test the API: .github#2
+
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-node@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Type-check and build the client: .github#2
+
+
+For more information about a job, try: gh run view --job=<job-id>
+View this run on GitHub: https://github.com/asc1-student12/evergreen-quote-launch/actions/runs/44652771899

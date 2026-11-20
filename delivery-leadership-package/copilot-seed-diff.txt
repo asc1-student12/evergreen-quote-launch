@@ -1,0 +1,19 @@
+diff --git a/api/src/seed.js b/api/src/seed.js
+index 1a97d4f..d9c872d 100644
+--- a/api/src/seed.js
++++ b/api/src/seed.js
+@@ -1,4 +1,4 @@
+-// src/seed.js - reset the evergreen database to the six known quotes (provided).
++// src/seed.js - reset the evergreen database to the eight known quotes (provided).
+ // Run with: npm run seed
+ // The stored premiums are historical: they were quoted under an older rate
+ // table, so they do not match what calculatePremium returns for the same
+@@ -18,6 +18,8 @@ await Quote.insertMany([
+   { _id: "q4", type: "auto", age: 23, coverageAmount: 30000, monthlyPremium: 100.8, tags: ["young-driver"] },
+   { _id: "q5", type: "home", age: 38, coverageAmount: 180000, monthlyPremium: 248.4, tags: ["renewal", "bundle"] },
+   { _id: "q6", type: "auto", age: 67, coverageAmount: 40000, monthlyPremium: 96.0, tags: ["senior"] },
++  { _id: "q7", type: "life", age: 45, coverageAmount: 500000, monthlyPremium: 210.0, tags: ["renewal"] },
++  { _id: "q8", type: "home", age: 31, coverageAmount: 350000, monthlyPremium: 420.0, tags: ["new", "bundle"] },
+ ]);
+ 
+ const count = await Quote.countDocuments();
